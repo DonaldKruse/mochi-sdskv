@@ -25,3 +25,5 @@ src/kv-config.h.in~
 *~
 pmpi/lib
 pmpi/bin
+pmpi/input.txt
+pmpi/serveraddr.txt
