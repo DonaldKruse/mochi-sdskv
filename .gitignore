@@ -19,3 +19,9 @@ m4/ltversion.m4
 m4/lt~obsolete.m4
 src/kv-config.h.in
 src/kv-config.h.in~
+
+# Donald Kruse's additions
+*.so
+*~
+pmpi/lib
+pmpi/bin
