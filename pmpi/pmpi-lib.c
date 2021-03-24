@@ -54,8 +54,6 @@ static void my_membership_update_cb(void* uargs,
         printf("Member %ld died\n", member_id);
         break;
     }
-
-    return 0;
 }
 /**
  * Puts a key-value pair in the sdskv database and checks
@@ -115,12 +113,6 @@ int MPI_Init(int *argc, char ***argv)
     }
 
     mpi_init_ret = PMPI_Init(argc, argv);
-    // these need to be the args to init_marg_open_db_check_error()
-    //sdskv_svr_addr_str = (*argv)[1];
-    //printf("the server address is %s\n", sdskv_svr_addr_str);
-    //mplex_id          = atoi((*argv)[2]);
-    //db_name           = (*argv)[3];
-    //num_keys          = atoi((*argv)[4]);
     init_margo_open_db_check_error(argc, argv);
 
 
@@ -185,21 +177,16 @@ int MPI_Finalize()
     //printf("Test: keys[0] = '%s', &keys[0]   = %#x\n", keys[0], &keys[0]);
     //printf("Test:                (&keys)[0]  = %#x\n", (&keys)[0]);
     //printf("Test:                (&keys[0])  = %#x\n", &(keys[0]));
-    char* key = NULL;
     unsigned ksize = 0;
-    unsigned datum = 0;
     unsigned dsize = 0;
     for (i = 0; i < num_keys; i++) {
-        key = keys[i];
         ksize = sizeof(char)*strlen(keys[i]);
-        //datum = data[i];
         dsize = sizeof(data[i]);
 	unsigned int global_data;
 	PMPI_Reduce(&(data[i]), &global_data, 1, MPI_UNSIGNED, MPI_SUM, 0, MPI_COMM_WORLD);
 	if (rank == 0) {
 	    sdskv_put_check_err(kvph, db_id,
-				(const void*) key, ksize,
-				//(const void*) &datum, dsize);
+				(const void*) keys[i], ksize,
 				(const void*) &(global_data), dsize);
 	}
 	PMPI_Barrier(MPI_COMM_WORLD);
@@ -259,8 +246,8 @@ int init_margo_open_db_check_error(int* argc, char*** argv) {
         cli_addr_prefix[i] = sdskv_svr_addr_str[i];
 
     /* Create the MPI group */
-    //ssg_ret = ssg_init();
-    //assert(ssg_ret == SSG_SUCCESS);
+    ssg_ret = ssg_init();
+    assert(ssg_ret == SSG_SUCCESS);
 
     /* start margo */
     // May have to use '1' in the third argument to create
@@ -280,18 +267,19 @@ int init_margo_open_db_check_error(int* argc, char*** argv) {
 
 
 
-    //ssg_group_config_t config = {
-    //    .swim_period_length_ms = 1000,
-    //    .swim_suspect_timeout_periods = 5,
-    //    .swim_subgroup_member_count = -1,
-    //    .ssg_credential = -1
-    //};
+    ssg_group_config_t config = {
+        .swim_period_length_ms = 1000,
+        .swim_suspect_timeout_periods = 5,
+        .swim_subgroup_member_count = -1,
+        .ssg_credential = -1
+    };
 
-    //ssg_group_id_t gid = ssg_group_create_mpi(
-    //    mid, "mygroup", MPI_COMM_WORLD,
-    //    &config, my_membership_update_cb, NULL);
+    ssg_group_id_t gid = ssg_group_create_mpi(
+        mid, "mygroup", MPI_COMM_WORLD,
+        &config, my_membership_update_cb, NULL);
 
 
+    PMPI_Barrier(MPI_COMM_WORLD);
 
 
 
@@ -330,7 +318,6 @@ int init_margo_open_db_check_error(int* argc, char*** argv) {
         return(-1);
     } else {
         printf("Rank %d: sdskv_provider_handle_create() success\n", rank);
-        printf("Rank %d: kvph = %d\n", rank, kvph);
     }
     PMPI_Barrier(MPI_COMM_WORLD);
 
@@ -338,10 +325,10 @@ int init_margo_open_db_check_error(int* argc, char*** argv) {
     ret = sdskv_open(kvph, db_name, &db_id);
     if(ret == 0) {
         printf("Rank %d: Successfully opened database %s, id is %ld\n", rank, db_name, db_id);
-        printf("Rank %d: db_id = %d\n", rank, db_id);
+        printf("Rank %d: db_id = %lu\n", rank, db_id);
     } else {
         printf("Rank %d: Error: could not open database %s\n", rank, db_name);
-        printf("Rank %d: db_id = %d\n", rank, db_id);
+        printf("Rank %d: db_id = %lu\n", rank, db_id);
         printf("Rank %d: sdskv_open return value was %d\n", rank, ret);
         printf("Rank %d: error message was: %s\n", rank, sdskv_error_messages[ret]);
         printf("Rank %d will not doing anything about error...\n", rank);

@@ -6,15 +6,9 @@
 
 
 int main(int argc, char** argv) {
-    int i;
-
-    //print_args(&argc, &argv, "main");
-
     int world_rank;
     int world_size;
-    MPI_Request request, request1;
-    int mpi_initialized = 0;
-    int err = 0;
+    MPI_Request request;
 
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);

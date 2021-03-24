@@ -134,7 +134,7 @@ int main(int argc, char *argv[])
             margo_finalize(mid);
             return -1;
         }
-	printf("Key = %s, value = %d, vsize = %d\n", key,  *value, vsize);
+	printf("Key = %s, value = %lu, vsize = %lu\n", key,  *value, vsize);
 	printf("\n");
     }
     free(value);
