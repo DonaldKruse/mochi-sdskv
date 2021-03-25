@@ -27,3 +27,4 @@ pmpi/lib
 pmpi/bin
 pmpi/input.txt
 pmpi/serveraddr.txt
+\.#*\#
