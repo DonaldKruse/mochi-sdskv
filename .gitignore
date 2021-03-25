@@ -22,6 +22,7 @@ src/kv-config.h.in~
 
 # Donald Kruse's additions
 *.so
+*.o
 *~
 pmpi/lib
 pmpi/bin
