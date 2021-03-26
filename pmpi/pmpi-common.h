@@ -18,12 +18,12 @@
 #include "../include/sdskv-common.h"
 
 
-static const char* keys[] = {"MPI_Init",
-                             "MPI_Send",
-                             "MPI_Isend",
-                             "MPI_Recv",
-                             "MPI_Finalize"};
-static const unsigned total_keys = 5;
+//static const char* keys[] = {"MPI_Init",
+//                             "MPI_Send",
+//                             "MPI_Isend",
+//                             "MPI_Recv",
+//                             "MPI_Finalize"};
+//static const unsigned total_keys = 5;
 
 
 typedef struct pmpi_counter_t {

@@ -64,10 +64,7 @@ int sdskv_put_check_err(const void *key, hg_size_t ksize,
         printf("Error: Rank %d sdskv_put() failed for kv pair (%s, %d). ret = %X\n",
                 rank, (char*) key, *(int*) value, ret);
         printf("Rank %d will not do anything about it...\n", rank);
-    } else {
-        printf("Rank %d: ret is %X\n", rank, ret);
-    }
-
+    } 
     return ret;
 }
 
@@ -119,8 +116,8 @@ int init_margo_open_db_check_error(int* argc, char*** argv) {
         cli_addr_prefix[i] = sdskv_svr_addr_str[i];
 
     /* Create the MPI group */
-    ssg_ret = ssg_init();
-    assert(ssg_ret == SSG_SUCCESS);
+    //ssg_ret = ssg_init();
+    //assert(ssg_ret == SSG_SUCCESS);
 
     /* start margo */
     mid = margo_init(cli_addr_prefix, MARGO_SERVER_MODE, 0, 0);
@@ -137,17 +134,17 @@ int init_margo_open_db_check_error(int* argc, char*** argv) {
 
 
 
-    ssg_group_config_t config = {
-        .swim_period_length_ms = 1000,
-        .swim_suspect_timeout_periods = 5,
-        .swim_subgroup_member_count = -1,
-        .ssg_credential = -1
-    };
-
-    ssg_group_id_t gid = ssg_group_create_mpi(
-        mid, "mygroup", MPI_COMM_WORLD,
-        &config, my_membership_update_cb, NULL);
-    PMPI_Barrier(MPI_COMM_WORLD);
+    //ssg_group_config_t config = {
+    //    .swim_period_length_ms = 1000,
+    //    .swim_suspect_timeout_periods = 5,
+    //    .swim_subgroup_member_count = -1,
+    //    .ssg_credential = -1
+    //};
+    // 
+    //ssg_group_id_t gid = ssg_group_create_mpi(
+    //    mid, "mygroup", MPI_COMM_WORLD,
+    //    &config, my_membership_update_cb, NULL);
+    //PMPI_Barrier(MPI_COMM_WORLD);
 
 
 

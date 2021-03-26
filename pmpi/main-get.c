@@ -14,13 +14,20 @@
 #include "../include/sdskv-common.h"
 
 
-const unsigned num_keys = 5;
-static const char* keys[] = {"MPI_Init", 
-			     "MPI_Send", 
-			     "MPI_Isend",
-			     "MPI_Recv",
-                             "MPI_Finalize"};
+//const unsigned num_keys = 5;
+//static const char* keys[] = {"MPI_Init", 
+//			     "MPI_Send", 
+//			     "MPI_Isend",
+//			     "MPI_Recv",
+//                             "MPI_Finalize"};
 
+static const char* keys[] = {
+                             "0:MPI_Isend",
+                             "1:MPI_Isend",
+                             "0:MPI_Recv",
+                             "1:MPI_Recv"
+};
+//static const unsigned num_keys = 4;
 
 int main(int argc, char *argv[])
 {
@@ -103,39 +110,45 @@ int main(int argc, char *argv[])
         margo_finalize(mid);
         return(-1);
     }
-    
-    
+
     /* **** get keys **** */
     unsigned i;
     unsigned long * value = malloc(sizeof(unsigned long));
     unsigned long vsize = sizeof(unsigned long);
     const char* key;
     unsigned ksize;
+    int exists = 0;
     for (i=0; i < num_keys; i++) {
         key = keys[i];
 	ksize = strlen(key);
+	sdskv_exists(kvph, db_id,
+		     (const void*) key, ksize,
+		     &exists);
 
-        ret = sdskv_get(kvph, db_id,
+	if (exists) {
+	    ret = sdskv_get(kvph, db_id,
 			(const void *) key, ksize,
 			(void *) value, &vsize);
-	printf("Return value was %d\n", ret);
-        if(ret != 0) {
-            fprintf(stderr, "Error: sdskv_get() failed (key was %s)\n", key);
-	    if (SDSKV_ERROR_IS_HG(ret)) {
-		printf("ERROR IS HG\n");
+	    if(ret != 0) {
+		fprintf(stderr, "Error: sdskv_get() failed (key was %s)\n", key);
+		if (SDSKV_ERROR_IS_HG(ret)) {
+		    printf("ERROR IS HG\n");
+		}
+		if (SDSKV_ERROR_IS_ABT(ret)) {
+		    printf("ERROR IS ABT\n");
+		}
+		sdskv_shutdown_service(kvcl, svr_addr);
+		sdskv_provider_handle_release(kvph);
+		margo_addr_free(mid, svr_addr);
+		sdskv_client_finalize(kvcl);
+		margo_finalize(mid);
+		return -1;
 	    }
-	    if (SDSKV_ERROR_IS_ABT(ret)) {
-		printf("ERROR IS ABT\n");
-	    }
-            sdskv_shutdown_service(kvcl, svr_addr);
-            sdskv_provider_handle_release(kvph);
-            margo_addr_free(mid, svr_addr);
-            sdskv_client_finalize(kvcl);
-            margo_finalize(mid);
-            return -1;
-        }
-	printf("Key = %s, value = %lu, vsize = %lu\n", key,  *value, vsize);
-	printf("\n");
+	    printf("Key = %s, value = %lu, vsize = %lu\n", key,  *value, vsize);
+	    printf("\n");
+	} else {
+	    printf("Key %s does not exist in DB\n", key);
+	}
     }
     free(value);
 

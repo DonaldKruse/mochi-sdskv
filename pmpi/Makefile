@@ -11,7 +11,7 @@ OBJS_PMPI = $(LIB)/libsdskv-server.so $(LIB)/libsdskv-client.so $(LIB)/pmpi-comm
 INCLUDE_PMPI = ../include/sdskv-common.h pmpi-common.h
 
 INCLUDE_MAIN_GET = ../include/
-FLAGS_MAIN_GET = -Wall -I$(INCLUDE_MAIN_GET) -g -o $(BIN)/main-get
+FLAGS_MAIN_GET = -Wall -g -I$(INCLUDE_MAIN_GET) -o $(BIN)/main-get
 LIBS_MAIN_GET = -lmargo -lmercury -labt -lssg
 OBJS_MAIN_GET = $(LIB)/libsdskv-server.so $(LIB)/libsdskv-client.so 
 
@@ -38,4 +38,4 @@ hello-world:
 
 
 clean:
-	rm *~
+	rm *~ *.o
