@@ -21,12 +21,14 @@
 //			     "MPI_Recv",
 //                             "MPI_Finalize"};
 
-static const char* keys[] = {
-                             "0:MPI_Isend",
-                             "1:MPI_Isend",
-                             "0:MPI_Recv",
-                             "1:MPI_Recv"
-};
+//static const char* keys[] = {
+//                             "0:MPI_Isend",
+//                             "1:MPI_Isend",
+//                             "0:MPI_Recv",
+//                             "1:MPI_Recv"
+//};
+static const char* keys[] = {"0:MPI_Isend",
+			     "1:MPI_Recv"};
 //static const unsigned num_keys = 4;
 
 int main(int argc, char *argv[])
@@ -98,10 +100,12 @@ int main(int argc, char *argv[])
     }
 
     /* open the database */
+    printf("\n\n\n");
+    printf("Getting key-value pairs from database\n");
     sdskv_database_id_t db_id;
     ret = sdskv_open(kvph, db_name, &db_id);
     if(ret == 0) {
-        printf("Successfuly open database %s, id is %ld\n", db_name, db_id);
+        printf("Successfuly opened database %s, id is %ld\n", db_name, db_id);
     } else {
         fprintf(stderr, "Error: could not open database %s\n", db_name);
         sdskv_provider_handle_release(kvph);
@@ -112,45 +116,82 @@ int main(int argc, char *argv[])
     }
 
     /* **** get keys **** */
-    unsigned i;
-    unsigned long * value = malloc(sizeof(unsigned long));
-    unsigned long vsize = sizeof(unsigned long);
-    const char* key;
-    unsigned ksize;
-    int exists = 0;
-    for (i=0; i < num_keys; i++) {
-        key = keys[i];
-	ksize = strlen(key);
-	sdskv_exists(kvph, db_id,
-		     (const void*) key, ksize,
-		     &exists);
 
-	if (exists) {
-	    ret = sdskv_get(kvph, db_id,
-			(const void *) key, ksize,
-			(void *) value, &vsize);
-	    if(ret != 0) {
-		fprintf(stderr, "Error: sdskv_get() failed (key was %s)\n", key);
-		if (SDSKV_ERROR_IS_HG(ret)) {
-		    printf("ERROR IS HG\n");
-		}
-		if (SDSKV_ERROR_IS_ABT(ret)) {
-		    printf("ERROR IS ABT\n");
-		}
-		sdskv_shutdown_service(kvcl, svr_addr);
-		sdskv_provider_handle_release(kvph);
-		margo_addr_free(mid, svr_addr);
-		sdskv_client_finalize(kvcl);
-		margo_finalize(mid);
-		return -1;
-	    }
-	    printf("Key = %s, value = %lu, vsize = %lu\n", key,  *value, vsize);
-	    printf("\n");
-	} else {
-	    printf("Key %s does not exist in DB\n", key);
-	}
-    }
-    free(value);
+    char* key1 = "test";
+    unsigned ksize = strlen(key1);
+
+    int value1 = 1;
+    int value2 = 2;
+    unsigned vsize = sizeof(int);
+
+
+    unsigned long * value = malloc(sizeof(int));
+    unsigned long vsizeget = sizeof(int);
+
+    ret = sdskv_put(kvph, db_id,
+                    (const void*) key1, ksize,
+                    (const void*) &value1, vsize);
+
+
+
+    
+    ret = sdskv_get(kvph, db_id,
+		    (const void *) key1, ksize,
+		    (void *) value, &vsizeget);
+
+    printf("kv-pair: %s => %d\n", key1, *(int*) value);
+
+
+    ret = sdskv_put(kvph, db_id,
+                    (const void*) key1, ksize,
+                    (const void*) &value2, vsize);
+
+    ret = sdskv_get(kvph, db_id,
+		    (const void *) key1, ksize,
+		    (void *) value, &vsizeget);
+
+    printf("kv-pair: %s => %d\n", key1, *(int*) value);
+
+
+    //unsigned i;
+    //unsigned long * value = malloc(sizeof(unsigned long));
+    //unsigned long vsize = sizeof(unsigned long);
+    //const char* key;
+    //unsigned ksize;
+    //int exists = 0;
+    //for (i=0; i < num_keys; i++) {
+    //    key = keys[i];
+    //	ksize = strlen(key);
+    //	sdskv_exists(kvph, db_id,
+    //		     (const void*) key, ksize,
+    //		     &exists);
+
+    //	if (exists) {
+    //	    ret = sdskv_get(kvph, db_id,
+    //			(const void *) key, ksize,
+    //			(void *) value, &vsize);
+    //	    if(ret != 0) {
+    //		fprintf(stderr, "Error: sdskv_get() failed (key was %s)\n", key);
+    //		if (SDSKV_ERROR_IS_HG(ret)) {
+    //		    printf("ERROR IS HG\n");
+    //		}
+    //		if (SDSKV_ERROR_IS_ABT(ret)) {
+    //		    printf("ERROR IS ABT\n");
+    //		}
+    //		sdskv_shutdown_service(kvcl, svr_addr);
+    //		sdskv_provider_handle_release(kvph);
+    //		margo_addr_free(mid, svr_addr);
+    //		sdskv_client_finalize(kvcl);
+    //		margo_finalize(mid);
+    //		return -1;
+    //	    }
+    //	    printf("Key = %s, value = %lu, vsize = %lu\n", key,  *value, vsize);
+    //	    printf("\n");
+    //	} else {
+    //	    printf("Key %s does not exist in DB\n", key);
+    //	}
+    //}
+//    free(value);
 
     //for(unsigned i=0; i < num_keys; i++) {
     //    auto k = keys[rand() % keys.size()];
